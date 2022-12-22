@@ -5,7 +5,11 @@ import requests
 import os
 
 app = Flask("Composite Service")
-target = "https://" + os.environ.get("TARGET")
+
+users_url = "http://" + os.environ.get("USERS_HOST")
+collections_url = "http://" + os.environ.get("COLLECTIONS_HOST")
+songs_url = "http://" + os.environ.get("SONGS_HOST")
+comments_url = "http://" + os.environ.get("COMMENTS_HOST")
 
 @app.route("/collections/create", methods=["post"])
 def collections_create():
@@ -19,7 +23,7 @@ def collections_create():
     # check if song_id is a valid id in song and song name is a valid song name
     if ("sid" in body):
         sid = str(body["sid"])
-        response = requests.get(target + "/songs/query/sid/" + sid)
+        response = requests.get(songs_url + "/songs/query/sid/" + sid)
         print(response.text)
         if (response.status_code != 200):
             # error
@@ -29,7 +33,7 @@ def collections_create():
             if (response.text == 'Not Found'):
                 return Response("Invalid Song ID", status=400, content_type="text/plain")
 
-    response = requests.post(target + "/collections/create", json=body)
+    response = requests.post(collections_url + "/collections/create", json=body)
     if (response.text == "Creation is successful"):
         return Response(response.text, status=200, content_type="text/plain")
     else:
@@ -49,8 +53,8 @@ def users_update(uid):
         user_name = body["user_name"]
         # update username
         # get comments by uid first
-        response = requests.get(target + "/comments/query/uid/" + uid)
-        print(target + "/comments/query/uid/" + uid)
+        response = requests.get(comments_url + "/comments/query/uid/" + uid)
+
         if (response.status_code != 200):
             # error
             return Response("Get error from API Gateway", status=500, content_type="text/plain")
@@ -67,10 +71,10 @@ def users_update(uid):
                         "user_name": user_name
                     }
                     cid = item["cid"]
-                    response = requests.post(target + "/comments/update/" + cid, json=json)
+                    response = requests.post(comments_url + "/comments/update/" + cid, json=json)
     
     # not updating username
-    response = requests.post(target + "/users/update/" + uid, json = body)
+    response = requests.post(users_url + "/users/update/" + uid, json = body)
     try:
         json = response.json()
         return Response(json.dump(json), status=200, content_type="application.json")
@@ -84,7 +88,7 @@ def users_delete(uid):
         return Response('Content-Type Not Supported', status=400, content_type="text/plain")
 
     # delete all the comments of the deleted user
-    response = requests.get(target + "/comments/query/uid/" + uid)
+    response = requests.get(comments_url + "/comments/query/uid/" + uid)
     if (response.status_code != 200):
         # error
         return Response("Get error from API Gateway", status=500, content_type="text/plain")
@@ -97,23 +101,9 @@ def users_delete(uid):
             data = response.json()
             for item in data:
                 cid = str(item["cid"])
-                response = requests.post(target + "/comments/delete/" + cid)
-                print(target + "/comments/delete/cid/" + cid)
+                response = requests.post(comments_url + "/comments/delete/" + cid)
+                print(comments_url + "/comments/delete/cid/" + cid)
                 print(response)
-                
-    @app.route("/comments/create", methods=["POST"])
-def create_comment():
-    # check request type
-    content_type = request.headers.get('Content-Type')
-    if (content_type != 'application/json'):
-        return Response('Content-Type Not Supported', status=400, content_type="text/plain")
-    
-    #  delete all the collections of the deleted user is handled by delete cascade
-    response = requests.post(target + "/users/delete/" + uid)
-    if (response.text == "Delete Successfully"):
-        return Response(response.text, status=200, content_type="text/plain")
-    else:
-        return Response(response.text, status=400, content_type="text/plain")
         
 @app.route("/comments/create", methods=["POST"])
 def create_comment():
@@ -130,7 +120,7 @@ def create_comment():
         return Response("Invalid Request", status=400, content_type="text/plain")
 
     # check if the user id and user name are valid
-    url = "https://" + target + "/users/query/" + str(body["uid"])
+    url = users_url + "/users/query/" + str(body["uid"])
     resp = requests.get(url)
 
     if resp.status_code == 200:
@@ -141,7 +131,7 @@ def create_comment():
         return Response("Invalid Request", status=400, content_type="text/plain")
 
     # check if the song id are valid
-    url = "https://" + target + "/songs/query/" + str(body["sid"])
+    url = songs_url + "/songs/query/sid/" + str(body["sid"])
     resp = requests.get(url)
 
     if resp.status_code == 200:
@@ -152,7 +142,7 @@ def create_comment():
         return Response("Invalid Request", status=400, content_type="text/plain")
 
     # save the comment to the database
-    url = "https://" + target + "/comments/create"
+    url = comments_url + "/comments/create"
     resp = requests.post(url, json=body)
 
     return Response("Create Successfully", status=200, content_type="text/plain")
@@ -165,19 +155,20 @@ def delete_song(sid):
         return Response('Content-Type Not Supported', status=400, content_type="text/plain")
 
     # delete the songs to the database
-    url = "https://" + target + "/songs/delete/" + sid
+    url = songs_url + "/songs/delete/" + sid
+
     resp = requests.post(url, json=())
     if resp.status_code != 200:
         return Response("Invalid Request", status=400, content_type="text/plain")
 
     # delete the comments in the database
-    url = "https://" + target + "/comments/delete/" + sid
+    url = comments_url + "/comments/delete/sid/" + sid
     resp = requests.post(url, json=())
     if resp.status_code != 200:
         return Response("Invalid Request", status=400, content_type="text/plain")
 
     # delete the song in the database
-    url = "https://" + target + "/collections/delete/" + sid
+    url = collections_url + "/collections/delete/sid/" + sid
     resp = requests.post(url, json=())
     if resp.status_code != 200:
         return Response("Invalid Request", status=400, content_type="text/plain")
@@ -187,5 +178,5 @@ def delete_song(sid):
 if __name__ == "__main__":
     host = os.environ.get("HOST", "0.0.0.0")
     port = int(os.environ.get("PORT", 5000))
-    target = os.environ.get("TARGET")
+
     app.run(host, port)
