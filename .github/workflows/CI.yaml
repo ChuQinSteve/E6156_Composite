@@ -10,6 +10,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v3
     - name: install requirements
       run: sudo apt update && sudo apt -y upgrade && pip install -r requirements.txt
     - name: run service
