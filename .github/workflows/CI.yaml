@@ -14,7 +14,7 @@ jobs:
     - name: install requirements
       run: pip install -r requirements.txt
     - name: setup environment
-      run: sudo source init.sh
+      run: chmod +x init.sh && . init.sh
     - name: run service
       run: nohup python3 app.py &
     - name: get health
