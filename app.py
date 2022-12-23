@@ -49,8 +49,8 @@ def users_update(uid):
     # get request body
     body = request.json
 
-    if ("user_name" in body):
-        user_name = body["user_name"]
+    if ("username" in body):
+        username = body["username"]
         # update username
         # get comments by uid first
         response = requests.get(comments_url + "/comments/query/uid/" + uid)
@@ -67,10 +67,10 @@ def users_update(uid):
                 # traverse through comments and change username in these comments
                 data = response.json()
                 json = {
-                    "user_name": user_name
+                    "username": username
                 }
-                response = requests.post(comments_url + "/comments/update/uid" + uid, json=json)
-    
+                response = requests.post(comments_url + "/comments/update/uid/" + uid, json=json)
+                    
     # not updating username
     response = requests.post(users_url + "/users/update/" + uid, json = body)
     try:
@@ -79,26 +79,19 @@ def users_update(uid):
     except Exception:
         return Response(response.text, status=200, content_type="application.json")
 
-@app.route("/delete/user/<uid>", methods=["post"])
+@app.route("/users/delete/<uid>", methods=["post"])
 def users_delete(uid):
     content_type = request.headers.get('Content-Type')
     if (content_type != 'application/json'):
         return Response('Content-Type Not Supported', status=400, content_type="text/plain")
 
-    # delete all the comments of the deleted user
-    response = requests.get(comments_url + "/comments/query/uid/" + uid)
-    if (response.status_code != 200):
-        # error
-        return Response("Get error from API Gateway", status=500, content_type="text/plain")
-    else:
-        if (response.text == 'Not Found'):
-            # no comments are associated with the user
-            # do nothing
-            pass
-        else:
-            data = response.json()
-            response = requests.post(comments_url + "/comments/delete/uid/" + uid)
-        return response
+    # delete all the comments of the deleted use
+    response = requests.post(comments_url + "/comments/delete/uid/" + uid)
+    
+    # delete user
+    resp = requests.post(users_url + "/users/delete/" + uid)
+
+    return Response("Succeed!", status=200, content_type="text/plain")
         
 @app.route("/comments/create", methods=["POST"])
 def create_comment():
@@ -138,12 +131,14 @@ def create_comment():
 
     # save the comment to the database
     url = comments_url + "/comments/create"
+    print(body)
     resp = requests.post(url, json=body)
-
+    
     if resp.status_code == 200:
         return Response("Create Successfully", status=200, content_type="text/plain")
     else:
-        return Response("Create error", status=200, content_type="text/plain")
+        print(resp.json)
+        return Response("Create error", status=400, content_type="text/plain")
 
 @app.route("/songs/delete/<sid>", methods=["POST"])
 def delete_song(sid):
@@ -154,22 +149,15 @@ def delete_song(sid):
 
     # delete the songs to the database
     url = songs_url + "/songs/delete/" + sid
-
-    resp = requests.post(url, json=())
-    if resp.status_code != 200:
-        return Response("Invalid Request", status=400, content_type="text/plain")
-
+    resp = requests.post(url)
+    
     # delete the comments in the database
     url = comments_url + "/comments/delete/sid/" + sid
-    resp = requests.post(url, json=())
-    if resp.status_code != 200:
-        return Response("Invalid Request", status=400, content_type="text/plain")
-
+    resp = requests.post(url)
+    
     # delete the song in the database
     url = collections_url + "/collections/delete/sid/" + sid
-    resp = requests.post(url, json=())
-    if resp.status_code != 200:
-        return Response("Invalid Request", status=400, content_type="text/plain")
+    resp = requests.post(url)
 
     return Response("Delete Successfully", status=200, content_type="text/plain")
 
