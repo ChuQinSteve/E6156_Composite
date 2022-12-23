@@ -176,7 +176,6 @@ def delete_song(sid):
     return Response("Delete Successfully", status=200, content_type="text/plain")
 
 if __name__ == "__main__":
-    host = os.environ.get("HOST", "0.0.0.0")
-    port = int(os.environ.get("PORT", 5000))
-
+    host = "0.0.0.0"
+    port = 9001
     app.run(host, port)

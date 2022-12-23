@@ -1,0 +1,26 @@
+ * Serving Flask app 'Composite Service'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:9001
+ * Running on http://172.31.92.98:9001
+Press CTRL+C to quit
+74.71.8.136 - - [23/Dec/2022 04:45:40] "POST /collections/create HTTP/1.1" 200 -
+74.71.8.136 - - [23/Dec/2022 04:47:07] "POST /users/update/1 HTTP/1.1" 200 -
+74.71.8.136 - - [23/Dec/2022 04:49:30] "POST /delete/user/1 HTTP/1.1" 400 -
+[2022-12-23 04:49:43,332] ERROR in app: Exception on /delete/user/1 [POST]
+Traceback (most recent call last):
+  File "/home/ubuntu/.local/lib/python3.10/site-packages/flask/app.py", line 2525, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/ubuntu/.local/lib/python3.10/site-packages/flask/app.py", line 1823, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/home/ubuntu/.local/lib/python3.10/site-packages/flask/app.py", line 1842, in finalize_request
+    response = self.make_response(rv)
+  File "/home/ubuntu/.local/lib/python3.10/site-packages/flask/app.py", line 2134, in make_response
+    raise TypeError(
+TypeError: The view function for 'users_delete' did not return a valid response. The function either returned None or ended without a return statement.
+74.71.8.136 - - [23/Dec/2022 04:49:43] "POST /delete/user/1 HTTP/1.1" 500 -
+74.71.8.136 - - [23/Dec/2022 04:53:28] "GET /comments/create HTTP/1.1" 405 -
+74.71.8.136 - - [23/Dec/2022 04:53:38] "POST /comments/create HTTP/1.1" 200 -
+74.71.8.136 - - [23/Dec/2022 05:00:23] "POST /comments/create HTTP/1.1" 200 -
+74.71.8.136 - - [23/Dec/2022 05:02:25] "POST /comments/create HTTP/1.1" 200 -
