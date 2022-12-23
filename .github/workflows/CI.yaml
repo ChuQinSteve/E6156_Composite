@@ -10,11 +10,12 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v2
     - name: install requirements
       run: pip install -r requirements.txt
     - name: setup environment
-      run: chmod +x init.sh && . init.sh
+      run: |
+          source init.sh
     - name: run service
       run: nohup python3 app.py &
     - name: get health
