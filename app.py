@@ -66,12 +66,10 @@ def users_update(uid):
             else:
                 # traverse through comments and change username in these comments
                 data = response.json()
-                for item in data:
-                    json = {
-                        "user_name": user_name
-                    }
-                    cid = item["cid"]
-                    response = requests.post(comments_url + "/comments/update/" + cid, json=json)
+                json = {
+                    "user_name": user_name
+                }
+                response = requests.post(comments_url + "/comments/update/uid" + uid, json=json)
     
     # not updating username
     response = requests.post(users_url + "/users/update/" + uid, json = body)
@@ -99,11 +97,7 @@ def users_delete(uid):
             pass
         else:
             data = response.json()
-            for item in data:
-                cid = str(item["cid"])
-                response = requests.post(comments_url + "/comments/delete/" + cid)
-                print(comments_url + "/comments/delete/cid/" + cid)
-                print(response)
+            response = requests.post(comments_url + "/comments/delete/uid/" + uid)
         
 @app.route("/comments/create", methods=["POST"])
 def create_comment():
@@ -145,7 +139,10 @@ def create_comment():
     url = comments_url + "/comments/create"
     resp = requests.post(url, json=body)
 
-    return Response("Create Successfully", status=200, content_type="text/plain")
+    if resp.status_code == 200:
+        return Response("Create Successfully", status=200, content_type="text/plain")
+    else:
+        return Response("Create error", status=200, content_type="text/plain")
 
 @app.route("/songs/delete/<sid>", methods=["POST"])
 def delete_song(sid):
