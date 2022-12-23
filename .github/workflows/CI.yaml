@@ -12,9 +12,9 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: install requirements
-      run: sudo apt update && sudo apt -y upgrade && pip install -r requirements.txt
+      run: pip install -r requirements.txt
     - name: setup environment
-      run: source init.sh
+      run: sudo source init.sh
     - name: run service
       run: nohup python3 app.py &
     - name: get health
