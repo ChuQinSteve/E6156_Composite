@@ -161,6 +161,10 @@ def delete_song(sid):
 
     return Response("Delete Successfully", status=200, content_type="text/plain")
 
+@app.route("/health", methods=["get"])
+def get_health():
+    return Response("OK", status=200, content_type="text/plain")
+
 if __name__ == "__main__":
     host = "0.0.0.0"
     port = 9001
