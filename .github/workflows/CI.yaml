@@ -1,0 +1,21 @@
+name: Continuous Integration
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches: 
+      - main
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: install requirements
+      run: pip install -r requirements.txt
+    - name: setup environment
+      run: chmod +x init.sh && source init.sh
+    - name: run service
+      run: nohup python3 app.py &
+    - name: get health
+      run: curl localhost:9001/health
