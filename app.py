@@ -98,6 +98,7 @@ def users_delete(uid):
         else:
             data = response.json()
             response = requests.post(comments_url + "/comments/delete/uid/" + uid)
+        return response
         
 @app.route("/comments/create", methods=["POST"])
 def create_comment():
